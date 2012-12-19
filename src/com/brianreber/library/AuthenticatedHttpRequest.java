@@ -22,7 +22,7 @@ public class AuthenticatedHttpRequest extends AsyncTask<String, Integer, String>
 	/**
 	 * The context to get preferences with
 	 */
-	private Context mContext;
+	protected Context mContext;
 
 	/**
 	 * The URL to request
