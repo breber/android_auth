@@ -1,9 +1,7 @@
 package com.brianreber.library;
 
 import java.net.HttpURLConnection;
-import java.util.Arrays;
 
-import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -16,8 +14,9 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.brianreber.library.AuthUtil;
-
+/**
+ * @author breber
+ */
 public class AuthenticatedHttpRequest extends AsyncTask<String, Integer, String> {
 
 	/**

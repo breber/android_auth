@@ -20,6 +20,9 @@ import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.UserRecoverableAuthException;
 
+/**
+ * @author breber
+ */
 public class AuthenticateTask extends AsyncTask<String, Integer, String> {
 	public static final String TAG = AuthenticateTask.class.getName();
 
