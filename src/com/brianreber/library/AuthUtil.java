@@ -25,21 +25,26 @@ public class AuthUtil {
 		activity.startActivityForResult(intent, Constants.ACCOUNT_CHOOSER_REQUEST);
 	}
 	
-	public static void performLoginFromResult(Activity activity, Intent result) {
+	public static void performLoginFromResult(Activity activity, Intent result, String url) {
 		String accountName = result.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
 		Log.d(TAG, "Account Name: " + accountName);
 		
 		SharedPreferences prefs = activity.getSharedPreferences(Constants.AUTH_PREFS, 0);
 		prefs.edit().putString(Constants.PREF_USERNAME, accountName).commit();
 
-		performLoginFromPrefs(activity);
+		performLoginFromPrefs(activity, url);
 	}
 	
-	public static void performLoginFromPrefs(Activity activity) {
+	public static void performLoginFromPrefs(Activity activity, String url) {
 		SharedPreferences prefs = activity.getSharedPreferences(Constants.AUTH_PREFS, 0);
 		String accountName = prefs.getString(Constants.PREF_USERNAME, "");
 		
-		AuthenticateTask authTask = new AuthenticateTask(activity);
+		AuthenticateTask authTask = new AuthenticateTask(activity, url);
 		authTask.execute(accountName);
+	}
+	
+	public static String getAuthCookie(Context ctx) {
+		SharedPreferences prefs = ctx.getSharedPreferences(Constants.AUTH_PREFS, 0);
+		return prefs.getString(Constants.PREF_AUTHTOKEN, "");
 	}
 }
