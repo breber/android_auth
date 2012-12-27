@@ -74,7 +74,7 @@ public class AuthenticateTask extends AsyncTask<String, Integer, String> {
 			int statusCode = statusLine.getStatusCode();
 			Header[] headers = res.getHeaders("Set-Cookie");
 			if (statusCode != 302 || headers.length == 0) {
-			        return null;
+		        return null;
 			}
 			
 			for (Cookie cookie : httpClient.getCookieStore().getCookies()) {
