@@ -1,4 +1,4 @@
-# Library for Authenticating Android Apps with AppEngine
+# Authenticating Android Apps with AppEngine
 
 ## Background
 
