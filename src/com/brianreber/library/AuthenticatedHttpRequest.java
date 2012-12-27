@@ -19,10 +19,19 @@ import android.util.Log;
  */
 public class AuthenticatedHttpRequest extends AsyncTask<String, Integer, String> {
 
+	public interface AuthenticatedHttpRequestCallback {
+		void taskDidFinish();
+	}
+	
 	/**
 	 * The context to get preferences with
 	 */
 	protected Context mContext;
+	
+	/**
+	 * The delegate to notify when the task is complete
+	 */
+	protected AuthenticatedHttpRequestCallback mDelegate;
 
 	/**
 	 * The URL to request
@@ -35,7 +44,12 @@ public class AuthenticatedHttpRequest extends AsyncTask<String, Integer, String>
 	protected boolean isPost = false;
 	
 	public AuthenticatedHttpRequest(Context ctx) {
+		this(ctx, null);
+	}
+	
+	public AuthenticatedHttpRequest(Context ctx, AuthenticatedHttpRequestCallback delegate) {
 		this.mContext = ctx;
+		this.mDelegate = delegate;
 	}
 
 	/* (non-Javadoc)
