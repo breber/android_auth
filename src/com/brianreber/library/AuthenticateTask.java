@@ -13,6 +13,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -26,22 +27,27 @@ import com.google.android.gms.auth.UserRecoverableAuthException;
 public class AuthenticateTask extends AsyncTask<String, Integer, String> {
 	public static final String TAG = AuthenticateTask.class.getName();
 
-	private Activity mActivity;
-	private String mUrl;
+	private final Activity mActivity;
+	private final String mUrl;
+	private String mAuthToken;
 
 	public AuthenticateTask(Activity activity, String url) {
 		mActivity = activity;
-		mUrl = url;
+
+		if (!url.endsWith("/")) {
+			mUrl = url + "/";
+		} else {
+			mUrl = url;
+		}
 	}
 
 	@Override
 	protected String doInBackground(String... params) {
-		String authToken = "";
 		try {
 			if (params.length == 1) {
-				authToken = GoogleAuthUtil.getToken(mActivity, params[0], "ah");
+				mAuthToken = GoogleAuthUtil.getToken(mActivity, params[0], "ah");
 			} else if (params.length == 2) {
-				authToken = GoogleAuthUtil.getToken(mActivity, params[0], params[1]);
+				mAuthToken = GoogleAuthUtil.getToken(mActivity, params[0], params[1]);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -52,7 +58,7 @@ public class AuthenticateTask extends AsyncTask<String, Integer, String> {
 			e.printStackTrace();
 		}
 
-		return getAuthCookie(authToken);
+		return getAuthCookie(mAuthToken);
 	}
 
 	/**
@@ -66,17 +72,18 @@ public class AuthenticateTask extends AsyncTask<String, Integer, String> {
 		try {
 	        // Get SACSID cookie
 			httpClient.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
-			String uri = mUrl + "/_ah/login?continue=http://localhost/&auth=" + authToken;
+			String uri = mUrl + "_ah/login?continue=http://localhost/&auth=" + authToken;
+
 			HttpGet method = new HttpGet(uri);
-			
 			HttpResponse res = httpClient.execute(method);
 			StatusLine statusLine = res.getStatusLine();
 			int statusCode = statusLine.getStatusCode();
 			Header[] headers = res.getHeaders("Set-Cookie");
+
 			if (statusCode != 302 || headers.length == 0) {
 		        return null;
 			}
-			
+
 			for (Cookie cookie : httpClient.getCookieStore().getCookies()) {
 				if (AUTH_COOKIE_NAME.equals(cookie.getName())) {
 					return AUTH_COOKIE_NAME + "=" + cookie.getValue();
@@ -88,17 +95,20 @@ public class AuthenticateTask extends AsyncTask<String, Integer, String> {
 		} finally {
 			httpClient.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, true);
 		}
-		
+
 		return null;
     }
-	
+
 	@Override
 	protected void onPostExecute(String result) {
 		super.onPostExecute(result);
 		Log.d(TAG, "Result: " + result);
 
 		SharedPreferences prefs = mActivity.getSharedPreferences(Constants.AUTH_PREFS, 0);
-		prefs.edit().putString(Constants.PREF_AUTHTOKEN, result).commit();
+		Editor edit = prefs.edit();
+		edit.putString(Constants.PREF_AUTHTOKEN, mAuthToken);
+		edit.putString(Constants.PREF_AUTHCOOKIE, result);
+		edit.commit();
 	}
 
 }

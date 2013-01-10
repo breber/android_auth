@@ -1,8 +1,10 @@
 package com.brianreber.library;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -22,12 +24,12 @@ public class AuthenticatedHttpRequest extends AsyncTask<String, Integer, String>
 	public interface AuthenticatedHttpRequestCallback {
 		void taskDidFinish();
 	}
-	
+
 	/**
 	 * The context to get preferences with
 	 */
 	protected Context mContext;
-	
+
 	/**
 	 * The delegate to notify when the task is complete
 	 */
@@ -37,16 +39,16 @@ public class AuthenticatedHttpRequest extends AsyncTask<String, Integer, String>
 	 * The URL to request
 	 */
 	protected String url = "";
-	
+
 	/**
 	 * Whether this is a post request
 	 */
 	protected boolean isPost = false;
-	
+
 	public AuthenticatedHttpRequest(Context ctx) {
 		this(ctx, null);
 	}
-	
+
 	public AuthenticatedHttpRequest(Context ctx, AuthenticatedHttpRequestCallback delegate) {
 		this.mContext = ctx;
 		this.mDelegate = delegate;
@@ -67,13 +69,13 @@ public class AuthenticatedHttpRequest extends AsyncTask<String, Integer, String>
 	protected String doInBackground(String... params) {
 		HttpClient client = new DefaultHttpClient();
 		HttpUriRequest request;
-		
+
 		if (isPost) {
 			request = new HttpPost(url);
 		} else {
 			request = new HttpGet(url);
 		}
-		
+
 		// Don't handle redirects - redirects get us into trouble when not logged in
 		client.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
 		request.setHeader("Content-Type", "application/json;charset=UTF-8");
@@ -86,14 +88,15 @@ public class AuthenticatedHttpRequest extends AsyncTask<String, Integer, String>
 				String contents = HttpUtils.readStreamAsString(response.getEntity().getContent());
 				return contents;
 			} else if (302 == response.getStatusLine().getStatusCode()) {
+				Log.d(AuthenticatedHttpRequest.class.getName(), "Status Code: 302 -- Redirection..." + response.getStatusLine().getStatusCode());
 				// We are redirecting - instead, invalidate the auth token and retry the request
-				// TODO:
-			} else {
-				Log.d("ART", "Status Code: " + response.getStatusLine().getStatusCode());
-				// TODO:
+				AuthUtil.invalidateToken(mContext);
 			}
+
 			return null;
-		} catch (Exception e) {
+		} catch (ClientProtocolException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
