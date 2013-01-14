@@ -1,5 +1,6 @@
 package com.brianreber.library;
 
+
 /**
  * @author breber
  */
@@ -12,4 +13,5 @@ public class Constants {
 	public static final String PREF_USERNAME = "username";
 	public static final String PREF_AUTHTOKEN = "authtoken";
 	public static final String PREF_AUTHCOOKIE = "authcookie";
+	public static final String TOKEN_INVALIDATED = "com.brianreber.library.AUTH_TOKEN_INVALIDATED";
 }

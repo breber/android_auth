@@ -62,5 +62,8 @@ public class AuthUtil {
 		GoogleAuthUtil.invalidateToken(ctx, prefs.getString(Constants.PREF_AUTHTOKEN, ""));
 
 		prefs.edit().remove(Constants.PREF_AUTHTOKEN).commit();
+
+		Intent intent = new Intent(Constants.TOKEN_INVALIDATED);
+		ctx.sendBroadcast(intent);
 	}
 }
