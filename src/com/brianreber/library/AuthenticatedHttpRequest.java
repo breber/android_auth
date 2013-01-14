@@ -19,7 +19,7 @@ import android.util.Log;
 /**
  * @author breber
  */
-public class AuthenticatedHttpRequest extends AsyncTask<String, Integer, String> {
+public abstract class AuthenticatedHttpRequest extends AsyncTask<String, Integer, String> {
 
 	public interface AuthenticatedHttpRequestCallback {
 		void taskDidFinish();
@@ -81,25 +81,29 @@ public class AuthenticatedHttpRequest extends AsyncTask<String, Integer, String>
 		request.setHeader("Content-Type", "application/json;charset=UTF-8");
 		request.setHeader("Cookie", AuthUtil.getAuthCookie(mContext));
 
+		String result = null;
+
 		try {
 			HttpResponse response = client.execute(request);
 
 			if (HttpURLConnection.HTTP_OK == response.getStatusLine().getStatusCode()) {
-				String contents = HttpUtils.readStreamAsString(response.getEntity().getContent());
-				return contents;
+				result = HttpUtils.readStreamAsString(response.getEntity().getContent());
 			} else if (302 == response.getStatusLine().getStatusCode()) {
 				Log.d(AuthenticatedHttpRequest.class.getName(), "Status Code: 302 -- Redirection..." + response.getStatusLine().getStatusCode());
 				// We are redirecting - instead, invalidate the auth token and retry the request
 				AuthUtil.invalidateToken(mContext);
 			}
 
-			return null;
+			processData(result);
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		return null;
+		return result;
 	}
+
+
+	protected abstract void processData(String data);
 }
