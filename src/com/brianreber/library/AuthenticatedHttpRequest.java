@@ -85,6 +85,7 @@ public abstract class AuthenticatedHttpRequest extends AsyncTask<String, Integer
 
 		try {
 			HttpResponse response = client.execute(request);
+			Log.w(AuthenticatedHttpRequest.class.getName(), "Status Code: " + response.getStatusLine().getStatusCode());
 
 			if (HttpURLConnection.HTTP_OK == response.getStatusLine().getStatusCode()) {
 				result = HttpUtils.readStreamAsString(response.getEntity().getContent());
@@ -92,6 +93,9 @@ public abstract class AuthenticatedHttpRequest extends AsyncTask<String, Integer
 				Log.d(AuthenticatedHttpRequest.class.getName(), "Status Code: 302 -- Redirection..." + response.getStatusLine().getStatusCode());
 				// We are redirecting - instead, invalidate the auth token and retry the request
 				AuthUtil.invalidateToken(mContext);
+			} else {
+				Log.d(AuthenticatedHttpRequest.class.getName(), "Status: " + response.getStatusLine().toString());
+				// TODO: send message indicating non-successful
 			}
 
 			processData(result);
